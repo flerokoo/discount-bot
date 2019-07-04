@@ -4,6 +4,7 @@ let sanitize = require("../util/sanitize")
 
 const ARTICLE_SELECTOR = ".product-article"
 const PRICE_SELECTOR = ".product-col__aside--right .price--current"
+const TITLE_SELECTOR = ".product-heading span"
 
 module.exports = class StreetBeatParser extends AbstractParser {
     async parse(url) {
@@ -17,6 +18,7 @@ module.exports = class StreetBeatParser extends AbstractParser {
 
         let article = $(ARTICLE_SELECTOR);
         let price = $(PRICE_SELECTOR);
+        let title = $(TITLE_SELECTOR);
 
         if (article.length == 0 || price.length == 0) {
             return Promise.reject(`Cant extract data from url: ${url}`)
@@ -24,11 +26,12 @@ module.exports = class StreetBeatParser extends AbstractParser {
 
         article = sanitize.article(article.text())
         price = sanitize.price(price.text())
+        title = title.text()
 
         if (isNaN(price)) {
             return Promise.reject(`Cant parse price from url: ${url}`);
         }
 
-        return { article, price };
+        return { article, price, title };
     }
 }

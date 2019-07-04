@@ -7,6 +7,7 @@ let getDbAdapter = require("./db/sqlite-adapter");
 let { EventEmitter } = require("events");
 let Crawler = require("./crawler")
 let { createDefaultParser } = require("./parser/parse-manager")
+let startBot = require("./bot")
 
 let mediator = new EventEmitter();
 
@@ -16,11 +17,19 @@ puppeteer.launch().then(browser => {
 }).then(async db => {
     let crawler = new Crawler(mediator, db);
     crawler.start();
-    // db.addItem("https://street-beat.ru/d/krossovki-asics-1191a176-101/")
+
+    startBot(mediator, db)
+    // db.addItem("https://street-beat.ru/d/krossovki-nike-ao4971-002/")
     //     .then(() => db.getItems())
     //     .then(console.log)
     
     // db.getItems().then(console.log)
+
+    // db.addWishByUrl("some_new_use2r2",
+    //     "https://street-beat.ru/d/krossovki-nike-ao4971-002/")
+    //     .then(() => db.getWishes())
+    //     .then(console.log)
+    //     .catch(console.error)
     
 }).catch(err => {
     throw new Error(err)

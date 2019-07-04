@@ -12,6 +12,10 @@ class ParseManager {
         this.checkParsers();
         let parser = this.selectParser(url)
 
+        if (parser === null) {
+            return Promise.reject("No parser found for " + url);
+        }
+
         return parser.parse(url);
     }
 

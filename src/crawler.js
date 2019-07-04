@@ -1,6 +1,8 @@
 let schedule = require("node-schedule");
 let config = require("./config");
 let { getDefaultParser } = require("./parser/parse-manager");
+let { fromTimestamp } = require("./db/timestamp");
+let moment = require("moment");
 
 module.exports = class Crawler {
     constructor(mediator, db) {
@@ -20,9 +22,8 @@ module.exports = class Crawler {
 
     start() {
         this.runningTasksAmounts = {};
-        this.rule = schedule.scheduleJob("*/30 * * * * *", () => this.runCycle())
+        this.rule = schedule.scheduleJob("*/10 * * * * *", () => this.runCycle())
         this.rule.invoke();
-        this.running = true;
     }
 
     stop() {
@@ -32,47 +33,54 @@ module.exports = class Crawler {
         }
     }
 
-    runCycle() {          
+    runCycle() {    
+        
+        if (this.running) {
+            return;
+        }
+
+        this.running = true;
+        
         this.db.getItems().then(items => {
-            
+        
             let current = 0;
             let slots = this.maxConcurrentTasks;
 
             let onComplete = (price, article, item) => {
                 slots++;
-                console.log(`prev price ${item.currentprice} cur ${price}`)
+                console.log(`${item.id} prev price ${item.current_price} cur ${price}`)
+                console.log(item)
+                this.db.updatePriceById(item.id, price).then(() => null)
                 next();
             }
 
             let next = () => {
                 if (!this.running) return;
 
-                while (slots > 0 && current < items.length) {
-                    let item = items[current++];   
-                    console.log(item)
+                if (current === items.length) {
+                    return this.running = false;
+                }
+
+                while (current < items.length && slots > 0) {
+                    let item = items[current++];  
+                    
+                    if (moment().diff(fromTimestamp(item.updated_at)) < config.updateInterval) {
+                        console.log("skipping " + item.id)
+                        continue;
+                    }
+
                     this.parser.getData(item.url)
-                        .then(({price, article}) => onComplete(price, article, item) )
+                        .then(({ price, article }) => onComplete(price, article, item))
                         .catch(err => {
                             // TODO add log
                             console.error(err)
                         })
                     slots--;
-                }   
+                }
             }
 
             next();
         })
-
-
-        let onComplete = () => {            
-            if (!this.running) return;
-
-            let totalRunning = this.totalRunningTasks;
-
-            while (totalRunning < this.maxConcurrentTasks) {
-                
-            }
-        }
     }
 
     get totalRunningTasks() {
