@@ -17,35 +17,33 @@ let createScene = (Scene, db) => {
     scene.command("cancel", ctx => ctx.scene.enter("main"))
 
     scene.on("message", async ctx => {
-        let text = ctx.message.text.toLowerCase();
-        let domain = extractDomain(text);
-
+        let url = ctx.message.text.toLowerCase();
+        let domain = extractDomain(url);
         
         if (!domain) {
             return ctx.reply("Not a link or shop is not supported")
         } 
 
-        let [err, data] = await to(parser.getData(text));
+        ctx.reply("Trying to retrieve item info...")  
+        let [err, data] = await to(parser.getData(url));
 
         if (err) {
             return ctx.reply(err);
         }
 
         let { price, article, title } = data;
-        
-        db.addWish(ctx.message.from.id, text, price, article, title)
-            .then(() => ctx.reply(`Added: ${title}, ${price}, ${article}`))
+
+              
+        db.wishes.addIfNotExists(ctx.message.from.id, url, price, article, title)
+            .then(() => {
+                ctx.reply(`Added: ${title}, ${price}, ${article}`).then(() =>
+                    ctx.scene.enter("main"))
+                
+            })
             .catch(err => {
                 // logger.error("add-wish-scene: " + err)
                 ctx.reply(err)
             });
-        
-        // console.log("START")
-        // db.addWishByUrl(ctx.message.from.id, text)
-        //     .then( ()=>ctx.reply("added"))
-        //     .then(db.getWishes)
-        //     .then(wishes => ctx.reply(JSON.stringify(wishes)))
-        //     .catch(ctx.reply)
     })
     
     return scene;
