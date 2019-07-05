@@ -3,6 +3,7 @@ let config = require("./config");
 let { getDefaultParser } = require("./parser/parse-manager");
 let { fromTimestamp } = require("./db/timestamp");
 let moment = require("moment");
+let Messages = require("./messages");
 
 module.exports = class Crawler {
     constructor(mediator, db) {
@@ -24,63 +25,93 @@ module.exports = class Crawler {
         this.runningTasksAmounts = {};
         this.rule = schedule.scheduleJob("*/10 * * * * *", () => this.runCycle())
         this.rule.invoke();
+        return this;
     }
 
     stop() {
+        
         if (this.rule) {
             this.rule.cancel();
             this.rule = null;
         }
+
+        return this;
     }
 
-    runCycle() {    
+    async runCycle() {    
         
         if (this.running) {
             return;
         }
 
-        this.running = true;
-        
-        this.db.getItems().then(items => {
-        
-            let current = 0;
-            let slots = this.maxConcurrentTasks;
+        this.running = true;        
+        let current = 0;
+        let completed = 0;
+        let slots = this.maxConcurrentTasks;
+        let items = await this.db.items.get()        
 
-            let onComplete = (price, article, item) => {
-                slots++;
-                console.log(`${item.id} prev price ${item.current_price} cur ${price}`)
-                console.log(item)
-                this.db.updatePriceById(item.id, price).then(() => null)
-                next();
+        
+        let finalize = () => {
+            this.running = false;
+            let data = items
+                .filter(item => !!item.new_price)
+                .map(item => ({ id: item.id, current_price: item.new_price }));
+            
+            data.length > 0 && this.db.items.batchUpdatePrices(data).then(() => {
+                this.mediator.emit(Messages.NOTIFY_USERS, "ok")
+            });
+            
+        }
+
+        let onItemDataLoad = (price, article, title, item) => {
+            
+            console.log(`${item.title} prev price ${item.current_price} cur ${price}`)
+            // console.log(item)
+            // this.db.items.updatePriceById(item.id, price).then(() => null)
+            item.new_price = price;
+            // console.log(`slots=${slots} completed=${title}`)
+            slots++;
+            completed++;
+
+            if (completed === items.length) {
+                return finalize();
             }
+            
+            next();
+        }
 
-            let next = () => {
-                if (!this.running) return;
+        // console.log(items)
 
-                if (current === items.length) {
-                    return this.running = false;
-                }
+        let next = () => {
+            if (!this.running) return;            
 
-                while (current < items.length && slots > 0) {
-                    let item = items[current++];  
-                    
-                    if (moment().diff(fromTimestamp(item.updated_at)) < config.updateInterval) {
-                        console.log("skipping " + item.id)
+            while (current < items.length && slots > 0) {                
+
+                let item = items[current++];  
+                
+                if (moment().diff(fromTimestamp(item.updated_at)) < config.updateInterval) {
+                    console.log("skipping " + item.title)
+                    completed++;                    
+                    if (completed === items.length) {
+                        return finalize();
+                    } else {
                         continue;
                     }
+                }                    
 
-                    this.parser.getData(item.url)
-                        .then(({ price, article }) => onComplete(price, article, item))
-                        .catch(err => {
-                            // TODO add log
-                            console.error(err)
-                        })
-                    slots--;
-                }
+                this.parser.getData(item.url)
+                    .then(({ price, article, title }) => onItemDataLoad(price, article, title, item))
+                    .catch(err => {
+                        // TODO add log
+                        console.error(err)
+                    })
+                
+                slots--;
             }
+        }
 
-            next();
-        })
+        next();
+        
     }
 
     get totalRunningTasks() {
