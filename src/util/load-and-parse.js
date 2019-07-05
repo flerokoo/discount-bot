@@ -18,6 +18,8 @@ module.exports = async (browser, url, fields) => {
         let selector = fields[field];
         let container = $(selector);
 
+        out[field] = null;
+        
         if (container.length > 0) {
             out[field] = container.text();
         }
