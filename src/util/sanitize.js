@@ -1,4 +1,8 @@
 module.exports = {
-    article: art => art.replace(/[\s\n]+/ig, ""),
-    price: price => parseInt(price.replace(/[\D]+/gi, ""))
+    article: art => typeof art === 'string'
+        ? art.replace(/[\s\n]+/ig, "")
+        : null,
+    price: price => typeof price === 'string'
+        ? parseInt(price.replace(/[\D]+/gi, ""))
+        : null
 }
