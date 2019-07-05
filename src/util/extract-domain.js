@@ -1,11 +1,6 @@
-module.exports = url => {
-    url = url.toLowerCase();
-
-    if (url.startsWith("http://")) {
-        url = url.substr(7)
-    } else if (url.startsWith("https://")) {
-        url = url.substr(8)
-    }
+module.exports = url => {    
+    url = url.toLowerCase()
+        .replace(/^https?:\/\//i, "")
 
     let result = url.match(/[.]?([\w\d\-]+\.[a-z]+)\//i);
 
