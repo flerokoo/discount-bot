@@ -2,7 +2,7 @@ let extractDomain = require("../util/extract-domain");
 let StreetBeatParser = require("./street-beat-parser");
 let LamodaParser = require("./lamoda-parser");
 let config = require("../config");
-let momoize = require("promise-memoize");
+let momoize = require("mem");
 
 class ParseManager {
     constructor(browser) {
