@@ -1,5 +1,5 @@
 module.exports = {
-    ADD_ENTRY_TO_DATABASE: "add-entry",
-    DATABASE_UPDATE: "database-update",
+    LOCK_CRAWLING: "lock-crawling",
+    UNLOCK_CRAWLING: "unlock-crawling",
     NOTIFY_USERS: "notify-users"
 }

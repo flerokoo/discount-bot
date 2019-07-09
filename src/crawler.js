@@ -19,6 +19,11 @@ module.exports = class Crawler {
 
         this.runningTasksAmounts = null;
         this.tasksToRun = [];
+
+        this.locked = false;
+
+        mediator.on(Messages.LOCK_CRAWLING, () => this.locked = true);
+        mediator.on(Messages.UNLOCK_CRAWLING, () => this.locked = false);
     }
 
     start() {
@@ -40,7 +45,7 @@ module.exports = class Crawler {
 
     async runCycle() {    
         
-        if (this.running) {
+        if (this.running || this.locked) {
             return;
         }
 
@@ -55,24 +60,22 @@ module.exports = class Crawler {
             this.running = false;
             let data = items
                 .filter(item => !!item.new_price)
-                .map(item => ({ id: item.id, current_price: item.new_price }));
-            
+                .map(item => ({ id: item.id, current_price: item.new_price }));           
             data.length > 0 && this.db.items.batchUpdatePrices(data).then(() => {
-                this.mediator.emit(Messages.NOTIFY_USERS, "ok")
+                this.mediator.emit(Messages.NOTIFY_USERS)
             });
             
         }
 
         let onItemDataLoad = (price, article, title, item) => {
             
-            console.log(`${item.title} prev price ${item.current_price} cur ${price}`)
+            console.log(`Updated ${item.title} prev price ${item.current_price} cur ${price}`)
             // console.log(item)
             // this.db.items.updatePriceById(item.id, price).then(() => null)
             item.new_price = price;
             // console.log(`slots=${slots} completed=${title}`)
             slots++;
             completed++;
-
             if (completed === items.length) {
                 return finalize();
             }
@@ -83,15 +86,14 @@ module.exports = class Crawler {
         // console.log(items)
 
         let next = () => {
-            if (!this.running) return;            
+            if (!this.running || this.locked) return;            
 
             while (current < items.length && slots > 0) {                
-
                 let item = items[current++];  
                 
                 if (moment().diff(fromTimestamp(item.updated_at)) < config.updateInterval) {
                     console.log("skipping " + item.title)
-                    completed++;                    
+                    completed++;     
                     if (completed === items.length) {
                         return finalize();
                     } else {
@@ -104,6 +106,7 @@ module.exports = class Crawler {
                     .catch(err => {
                         // TODO add log
                         console.error(err)
+                        completed++;
                     })
                 
                 slots--;
