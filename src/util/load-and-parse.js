@@ -16,12 +16,15 @@ module.exports = async (browser, url, fields) => {
 
     for (let field in fields) {        
         let selector = fields[field];
-        let container = $(selector);
-
         out[field] = null;
-        
-        if (container.length > 0) {
-            out[field] = container.text();
+
+        if (typeof selector === "function") {
+            out[field] = selector($);
+        } else {
+            let container = $(selector);
+            if (container.length > 0) {
+                out[field] = container.text();
+            }
         }
     }
     
