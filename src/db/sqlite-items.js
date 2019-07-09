@@ -8,7 +8,7 @@ let moment = require("moment");
 let { getTimestamp } = require("./timestamp")
 let through = require("through2");
 let { getDefaultParser } = require("../parser/parse-manager")
-let memoize = require("promise-memoize");
+let memoize = require("mem");
 let helpers = require("./sqlite-helpers");
 
 let forceQuery = a => a;

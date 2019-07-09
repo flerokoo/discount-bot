@@ -31,19 +31,22 @@ let startBotFactory = Telegraf => (mediator, db) => {
     // })
     
     mediator.on(Messages.NOTIFY_USERS, async () => {
-        let [items, wishes] = await Promise.all([db.items.get(), db.wishes.get()]);
-        let itemsMap = items.reduce((acc, item) => (acc[item.url] = item, acc), {});
-        
-        wishes.forEach(wish => {
-            let item = itemsMap[wish.url];
-            let current = parseInt(item.current_price);
+        mediator.emit(Messages.LOCK_CRAWLING)
+        let data = await db.wishes.getWithItemsData()
+        mediator.emit(Messages.UNLOCK_CRAWLING)
+        // move this to the moment after updating last known prices
+        data.forEach(wish => {
+            let user_id = parseInt(wish.user_id);
+            let current = parseInt(wish.current_price)
             let last = parseInt(wish.last_known_price)
-            let initial = parseInt(item.initial_price)
+            let initial = parseInt(wish.initial_price)
+            let title = wish.title;
+
             if (last > current) {
-                bot.telegram.sendMessage(wish.user_id, `${item.title} current price — ${current}, initial price — ${initial}`)
+                bot.telegram.sendMessage(wish.user_id,
+                    `${title} current price — ${current}, initial price — ${initial}`)
             }
         })
-        // TODO update last known prices
     });
 
     bot.startPolling();

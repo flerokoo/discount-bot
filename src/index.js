@@ -12,6 +12,8 @@ let loadAndParse = require("./util/load-and-parse")
 
 let mediator = new EventEmitter();
 
+
+
 puppeteer.launch().then(browser => {
     createDefaultParser(browser);
     return getDbAdapter(mediator);
@@ -19,6 +21,7 @@ puppeteer.launch().then(browser => {
     let crawler = new Crawler(mediator, db).start();
     startBot(mediator, db);
 }).catch(err => {
-    throw new Error(err)
+    console.log("Failed to launch app")
+    console.log(err.stack || err)
 });
 

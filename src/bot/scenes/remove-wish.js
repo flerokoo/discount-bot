@@ -12,9 +12,8 @@ let createScene = (Scene, db) => {
     let scene = new Scene("remove-wish");
 
     scene.enter(ctx => {
-        
-        // db.items.get({user_id})
-        db.wishes.getWithItemsDataByUserId(ctx.chat.id).then(data => {            
+        db.wishes.getWithItemsData({ "wishes.user_id": ctx.chat.id }).then(data => {            
+            console.log(data)
             if (!data || data.length <= 0) {
                 ctx.reply("Nothing to delete, go /back to main menu")
             } else {
@@ -27,8 +26,6 @@ let createScene = (Scene, db) => {
             ctx.reply("Can't fetch your items, try again later")
             ctx.scene.enter("main");
         })
-
-        
     });
 
     scene.command("back", ctx => ctx.scene.enter("main"))
@@ -38,54 +35,31 @@ let createScene = (Scene, db) => {
 
         let result = text.match(/remove([\d]+)/i);
         
-        if (result) {
-            let id = parseInt(result[1]);
-            let [err, wishes] = await to(db.wishes.get({ user_id: ctx.chat.id, id }));
-            
-            if (err) {
-                return ctx.reply("Can't remove item: " + err);
-            }
-
-            if (wishes.length > 0) {
-                db.wishes.delete({ id })
-                    .then(res => {
-                        ctx.reply("Success!");
-                        ctx.scene.enter("main")
-                    })
-                    .catch(err => {
-                        ctx.reply("Something wrong: " + err);
-                        ctx.scene.enter("main")
-                    })
-            }                 
+        if (!result) {
+            return;
         }
 
-        // let url = ctx.message.text.toLowerCase();
-        // let domain = extractDomain(url);
+        let id = parseInt(result[1]);
+        let [err, wishes] = await to(db.wishes.get({ user_id: ctx.chat.id, id }));
         
-        // if (!domain) {
-        //     return ctx.reply("Not a link or shop is not supported")
-        // } 
+        if (err) {
+            return ctx.reply("Can't remove item: " + err);
+        }
 
-        // ctx.reply("Trying to retrieve item info...")  
-        // let [err, data] = await to(parser.getData(url));
+        if (wishes.length <= 0) {
+            return;
+        }
 
-        // if (err) {
-        //     return ctx.reply(err);
-        // }
+        db.wishes.delete({ id })
+            .then(res => {
+                ctx.reply("Success!");
+                ctx.scene.enter("main")
+            })
+            .catch(err => {
+                ctx.reply("Something wrong: " + err);
+                ctx.scene.enter("main")
+            })
 
-        // let { price, article, title } = data;
-
-              
-        // db.wishes.addIfNotExists(ctx.message.from.id, url, price, article, title)
-        //     .then(() => {
-        //         ctx.reply(`Added: ${title}, ${price}, ${article}`).then(() =>
-        //             ctx.scene.enter("main"))
-                
-        //     })
-        //     .catch(err => {
-        //         // logger.error("add-wish-scene: " + err)
-        //         ctx.reply(err)
-        //     });
     });
     
     return scene;

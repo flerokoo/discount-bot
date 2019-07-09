@@ -7,7 +7,7 @@ let moment = require("moment");
 let { getTimestamp } = require("./timestamp")
 let through = require("through2");
 let { getDefaultParser } = require("../parser/parse-manager")
-let memoize = require("promise-memoize");
+let memoize = require("mem");
 let helpers = require("./sqlite-helpers");
 
 let forceQuery = a => a;
@@ -98,17 +98,24 @@ module.exports = (db, adapter) => {
         });
     }
 
-    let getWithItemsDataByUserId = user_id => {
-        return db("wishes")
+    let getWithItemsData = (where = null) => {
+        let query = db("wishes")
             .join("items", "wishes.url", "items.url")
             .select([
                 "items.title",
                 "items.url",
+                "items.current_price",
                 "wishes.id",
-                "wishes.user_id"
+                "wishes.user_id",
+                "wishes.last_known_price",
+                "wishes.initial_price"
             ])
-            .where("wishes.user_id", user_id)
-            .then(forceQuery)
+            
+        if (where !== null && typeof where === 'object') {
+            query.where(where)
+        }
+
+        return query.then(forceQuery)
     }
 
     let delete_ = helpers.genericDelete(db, "wishes");
@@ -117,7 +124,7 @@ module.exports = (db, adapter) => {
         addIfNotExists,
         addByUrlIfNotExists,
         get,
-        getWithItemsDataByUserId,
+        getWithItemsData,
         update,
         doesUserHave,
         iterate,
@@ -128,23 +135,4 @@ module.exports = (db, adapter) => {
     Object.assign(adapter, { wishes: all })
 
 
-
-
-
-
-
-    // setTimeout(async () => {
-    //     console.log("PRIVET")
-
-
-    //     let res = await db("items")
-    //         .join("wishes", 111, "=", "wishes.user_id")
-    //         .select([
-    //             "items.title",
-    //             "wishes.id"
-    //         ])
-    //         // .where("user_id", 111)
-    //         .then(forceQuery)
-    //     console.log(res)
-    // }, 500)
 }
