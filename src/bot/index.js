@@ -12,6 +12,7 @@ let startBotFactory = Telegraf => (mediator, db) => {
     const stage = new Stage();
     stage.register(require("./scenes/main")(db))
     stage.register(require("./scenes/add-wish")(db))
+    stage.register(require("./scenes/remove-wish")(db))
 
     bot.use(session())
     bot.use(stage.middleware())
@@ -29,7 +30,6 @@ let startBotFactory = Telegraf => (mediator, db) => {
     //     }, 1000)
     // })
     
-    console.log("adding")
     mediator.on(Messages.NOTIFY_USERS, async () => {
         let [items, wishes] = await Promise.all([db.items.get(), db.wishes.get()]);
         let itemsMap = items.reduce((acc, item) => (acc[item.url] = item, acc), {});
@@ -43,8 +43,6 @@ let startBotFactory = Telegraf => (mediator, db) => {
                 bot.telegram.sendMessage(wish.user_id, `${item.title} current price — ${current}, initial price — ${initial}`)
             }
         })
-
-
         // TODO update last known prices
     });
 

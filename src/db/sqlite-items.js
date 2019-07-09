@@ -11,7 +11,7 @@ let { getDefaultParser } = require("../parser/parse-manager")
 let memoize = require("promise-memoize");
 let helpers = require("./sqlite-helpers");
 
-let forceQuery = () => null;
+let forceQuery = a => a;
 
 module.exports = (db, adapter) => {
 
@@ -19,22 +19,36 @@ module.exports = (db, adapter) => {
         let shop = extractDomain(url)    
         
         return adapter.items.existsByUrl(url)
-            .then(exists => exists ? Promise.reject("item already on the list") : null)
-            // .then(() => console.log("adding", title, url, article, current_price))
-            .then(() => db("items").insert({
-                title,
-                url,
-                shop,
-                article,
-                current_price
+            .then(exists => exists
+                ? Promise.resolve("item already on the list")
+                : db("items").insert({
+                    title,
+                    url,
+                    shop,
+                    article,
+                    current_price
             }))
             .then(forceQuery)
     }
+
+    let addByUrl = async url => {
+        let parser = getDefaultParser();
+        let [err, data] = await to(parser.getData(url)) // should be fast because of memoization
+        
+        if (err) {
+            return Promise.reject("Cant retrieve item info");
+        }
+
+        let { price, article, title } = data;
+
+        return adapter.items.add(title, url, article, price).then(forceQuery)
+    }
  
     let get = helpers.genericGet(db, "items");
+    let getNameByUrl = memoize(url => get({ url }));
 
     let exists = helpers.genericExists(db, "items");
-    let existsByUrl = url => exists({ url });
+    let existsByUrl = memoize(url => exists({ url }));
 
     let _update = helpers.genericUpdate(db, "items");
     let update = (where, values) => _update(where, { ...values, updated_at: getTimestamp() })
@@ -52,6 +66,6 @@ module.exports = (db, adapter) => {
         return db.raw(queries).then(forceQuery);
     }
 
-    let all = { add, get, exists, update, updatePriceById, existsByUrl, batchUpdatePrices }
+    let all = { add, addByUrl, get, exists, update, updatePriceById, existsByUrl, batchUpdatePrices, getNameByUrl }
     Object.assign(adapter, { items: all })
 }

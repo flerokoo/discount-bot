@@ -1,5 +1,5 @@
 
-let forceQuery = () => null;
+let forceQuery = a => a;
 
 let genericExists = (db, table) => (where = null) => {
     if (typeof where !== 'object' || where === null) {
@@ -49,4 +49,12 @@ let genericUpdate = (db, table) => (where = null, values = null) => {
             .then(forceQuery) 
 }
 
-module.exports = { genericExists, genericGet, genericUpdate }
+let genericDelete = (db, table) => (where = null) => {
+    if (typeof where !== "object" || where === null) {
+        Promise.reject("Update queries without 'where' object are not allowed");
+    }
+
+    return db(table).where(where).delete().then(forceQuery);
+}
+
+module.exports = { genericExists, genericGet, genericUpdate, genericDelete }

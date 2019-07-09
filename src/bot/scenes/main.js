@@ -8,11 +8,19 @@ let mainMenuText = "Hey-yo! You are in main menu now."
 let shopsText = mainMenuText + "\nHere's a list of supported shops:\n" + config.supportedShops.join("\n")
 
 let mainMenuKeyboard = Markup.inlineKeyboard([
-    Markup.callbackButton("Shops", "shops"),
-    Markup.callbackButton("Add item", "add")
+    [ 
+        Markup.callbackButton("➖ Remove item", "remove"),
+        Markup.callbackButton("➕ Add item", "add"),
+    ],
+    [
+        Markup.callbackButton("🛒 Shops", "shops"),
+    ],
+    [
+        Markup.callbackButton("📰 Items", "items"),
+    ],
 ]).oneTime().resize().extra()
 
-let createScene = Scene => {
+let createScene = (Scene, db) => {
     let scene = new Scene("main");
     scene.enter(ctx => {
         // ctx.reply("ye", Markup.keyboard(["Add item", "Remove item", "Shops"]).oneTime().resize().extra());
@@ -22,15 +30,28 @@ let createScene = Scene => {
     scene.inlineQuery("Coke", console.log)
     
 
-    scene.action("add", ctx => {
-        ctx.scene.enter("add-wish")
-    });
+    scene.action("add", ctx => ctx.scene.enter("add-wish"));
+    scene.action("remove", ctx => ctx.scene.enter("remove-wish"));
 
     scene.action("shops", ctx => ctx.editMessageText(shopsText, mainMenuKeyboard))
+    scene.action("items", ctx => {
+        // db.wishes.get({ user_id: ctx.chat.id }).then(result => {
+        //     console.log(result)
+        //     let text = result.map(i => `${i.title}\n${i.url}`).join("\n");
+        //     ctx.editMessageText("Here's your wishlist:\n\n" + text);            
+        // }).catch(err => {
+        //     ctx.editMessageText("Can't get your wishlist, try later")
+        // })
 
-    // scene.hears("Add item", ctx => ctx.scene.enter("add-wish"))
-    // scene.hears("Shops", ctx => ctx.reply(config.supportedShops.join("\n")))
-
+        db.wishes.getWithItemsDataByUserId(ctx.chat.id).then(data => {
+            let text = data.map(i => `${i.title}\n${i.url}`).join("\n");
+            ctx.editMessageText("Here's your wishlist:\n\n" + text, mainMenuKeyboard); 
+        }).catch(err => {
+            ctx.editMessageText("Can't get your wishlist, try later", mainMenuKeyboard)
+        })
+        
+    });
+    
     return scene;
 }
 

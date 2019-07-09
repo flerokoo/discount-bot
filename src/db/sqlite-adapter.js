@@ -18,7 +18,7 @@ let initialize = async () => {
     if (!hasTable) {
         [err, query] = await db.schema.createTable("items", table => {
             table.increments();
-            table.string("shop");
+            table.string("shop"); // TODO remove
             table.string("title");
             table.string("url");
             table.string("article");
@@ -34,8 +34,6 @@ let initialize = async () => {
         await db.schema.createTable("wishes", table => {
             table.increments();
             table.string("user_id");
-            table.string("article");
-            table.string("shop");
             table.string("url");
             table.float("initial_price");
             table.float("last_known_price");

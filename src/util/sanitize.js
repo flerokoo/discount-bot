@@ -1,4 +1,4 @@
-module.exports = {
+module.exports = {    
     article: art => typeof art === 'string'
         ? art.replace(/[\s\n]+/ig, "")
         : null,

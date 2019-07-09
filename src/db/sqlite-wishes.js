@@ -10,11 +10,11 @@ let { getDefaultParser } = require("../parser/parse-manager")
 let memoize = require("promise-memoize");
 let helpers = require("./sqlite-helpers");
 
-let forceQuery = () => null;
+let forceQuery = a => a;
 
 module.exports = (db, adapter) => {    
     
-    let addIfNotExists = async (user_id, url, initial_price, article, title) => {
+    let addIfNotExists = async (user_id, url, initial_price) => {
         let shop = extractDomain(url);
     
         if (config.supportedShops.indexOf(shop) === -1) {
@@ -34,15 +34,13 @@ module.exports = (db, adapter) => {
         let insertPromise = db("wishes").insert({
             user_id,
             url, 
-            article,
             initial_price,
             last_known_price: initial_price,
-            shop
-        }, ["url", "article", "price"]).then(console.log).then(forceQuery)
+        }).then(forceQuery)
     
         // ADD WISHES ITEM TO THE LIST
         let addItemPromise = adapter.items
-            .add(title, url, article, initial_price)
+            .addByUrl(url)
             .catch(err => console.log("JUST HERE", err))
         
         return Promise.all([insertPromise, addItemPromise]);
@@ -60,7 +58,7 @@ module.exports = (db, adapter) => {
         let { title, article, price } = data;
     
         return adapter.wishes
-            .addIfNotExists(user_id, url, price, article, title)
+            .addIfNotExists(user_id, url, price)
             .then(forceQuery);
     }
 
@@ -100,6 +98,53 @@ module.exports = (db, adapter) => {
         });
     }
 
-    all = { addIfNotExists, addByUrlIfNotExists, get, update, doesUserHave, iterate, exists }
+    let getWithItemsDataByUserId = user_id => {
+        return db("wishes")
+            .join("items", "wishes.url", "items.url")
+            .select([
+                "items.title",
+                "items.url",
+                "wishes.id",
+                "wishes.user_id"
+            ])
+            .where("wishes.user_id", user_id)
+            .then(forceQuery)
+    }
+
+    let delete_ = helpers.genericDelete(db, "wishes");
+
+    let all = {
+        addIfNotExists,
+        addByUrlIfNotExists,
+        get,
+        getWithItemsDataByUserId,
+        update,
+        doesUserHave,
+        iterate,
+        exists,
+        delete: delete_
+    }
+
     Object.assign(adapter, { wishes: all })
+
+
+
+
+
+
+
+    // setTimeout(async () => {
+    //     console.log("PRIVET")
+
+
+    //     let res = await db("items")
+    //         .join("wishes", 111, "=", "wishes.user_id")
+    //         .select([
+    //             "items.title",
+    //             "wishes.id"
+    //         ])
+    //         // .where("user_id", 111)
+    //         .then(forceQuery)
+    //     console.log(res)
+    // }, 500)
 }
