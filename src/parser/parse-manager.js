@@ -1,11 +1,17 @@
 let extractDomain = require("../util/extract-domain");
 let StreetBeatParser = require("./street-beat-parser");
+let LamodaParser = require("./lamoda-parser");
 let config = require("../config");
+let momoize = require("promise-memoize");
 
 class ParseManager {
     constructor(browser) {
         this.parsers = {};
         this.browser = browser;
+
+        this.getData = momoize(this.getData.bind(this), {
+            maxAge: 1 * 60 * 60 * 1000 //1 hour in ms
+        })
     }
 
     async getData(url) {
@@ -47,6 +53,7 @@ let createDefaultParser = browser => {
     if (defaultParser === null) {
         defaultParser = new ParseManager(browser);
         defaultParser.registerParser("street-beat.ru", new StreetBeatParser());
+        defaultParser.registerParser("lamoda.ru", new LamodaParser());
     }
     
     return defaultParser;
