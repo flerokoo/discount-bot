@@ -1,17 +1,28 @@
 let cheerio = require("cheerio");
+let bypass = require("./bypass-bot-detection");
+let to = require("await-to-js").to;
 
 module.exports = async (browser, url, fields) => {
-      
-    let page = await browser.newPage(); 
+    let _, err, html, page = await browser.newPage(); 
 
-    await page.goto(url)
+    [err, _] = await to(bypass(page));
+    if (err) {
+        return Promise.reject("Error when bypassing bot detection: " + err);
+    }
 
-    let html = await page.content();
+    [err, _] = await to(page.goto(url));
+    if (err) {
+        return Promise.reject(`Error when loading ${url}: ` + err);
+    }
+
+    [err, html] = await to(page.content());
+    if (err) {
+        return Promise.reject("Error when getting html from page: " + err)
+    }
 
     await page.close();
     
     let $ = cheerio.load(html);
-
     let out = {};
 
     for (let field in fields) {        
