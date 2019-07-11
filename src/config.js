@@ -4,7 +4,9 @@ module.exports = {
     updateInterval: 10000, //ms
     supportedShops: [
         "street-beat.ru",
-        "lamoda.ru"
+        "lamoda.ru",
+        "sneakerhead.ru",
+        "asos.com"
     ],
     botToken: process.env.BOT_TOKEN
 }

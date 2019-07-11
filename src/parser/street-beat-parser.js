@@ -50,14 +50,11 @@ module.exports = class StreetBeatParser extends AbstractParser {
 
         let { title, article, price } = data;
 
+        title = sanitize.title(title);
         article = sanitize.article(article)
         price = sanitize.price(price)
 
-        if (!article || !price) {
-            return Promise.reject("Cant extract data from " + url)
-        }
-
-        if (isNaN(price)) {
+        if (!price || isNaN(price)) {
             return Promise.reject("Cant extract price from " + url);
         }
 
