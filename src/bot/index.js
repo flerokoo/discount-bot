@@ -33,8 +33,10 @@ let startBotFactory = Telegraf => (mediator, db) => {
     mediator.on(Messages.NOTIFY_USERS, async () => {
         mediator.emit(Messages.LOCK_CRAWLING)
         let data = await db.wishes.getWithItemsData()
-        mediator.emit(Messages.UNLOCK_CRAWLING)
+        
         // move this to the moment after updating last known prices
+
+
         data.forEach(wish => {
             let user_id = parseInt(wish.user_id);
             let current = parseInt(wish.current_price)
@@ -43,10 +45,13 @@ let startBotFactory = Telegraf => (mediator, db) => {
             let title = wish.title;
 
             if (last > current) {
-                bot.telegram.sendMessage(wish.user_id,
-                    `${title} current price — ${current}, initial price — ${initial}`)
+                bot.telegram.sendMessage(user_id, `${title} current price — ${current}, initial price — ${initial}`)
             }
         })
+
+        let lastKnownPrices = data.map(i => ({ id: i.id, price: i.current_price }));
+        await db.wishes.batchUpdateLastKnownPrices(lastKnownPrices)
+        mediator.emit(Messages.UNLOCK_CRAWLING)
     });
 
     bot.startPolling();

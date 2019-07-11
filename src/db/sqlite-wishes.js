@@ -129,7 +129,8 @@ module.exports = (db, adapter) => {
         doesUserHave,
         iterate,
         exists,
-        delete: delete_
+        delete: delete_,
+        batchUpdateLastKnownPrices
     }
 
     Object.assign(adapter, { wishes: all })
