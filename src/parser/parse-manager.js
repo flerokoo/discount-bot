@@ -1,6 +1,8 @@
 let extractDomain = require("../util/extract-domain");
 let StreetBeatParser = require("./street-beat-parser");
 let LamodaParser = require("./lamoda-parser");
+let SneakerheadParser = require("./sneakerhead-parser");
+let AsosParser = require("./asos-parser");
 let config = require("../config");
 let momoize = require("mem");
 
@@ -54,6 +56,8 @@ let createDefaultParser = browser => {
         defaultParser = new ParseManager(browser);
         defaultParser.registerParser("street-beat.ru", new StreetBeatParser());
         defaultParser.registerParser("lamoda.ru", new LamodaParser());
+        defaultParser.registerParser("sneakerhead.ru", new SneakerheadParser());
+        defaultParser.registerParser("asos.com", new AsosParser());
     }
     
     return defaultParser;

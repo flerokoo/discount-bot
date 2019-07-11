@@ -12,9 +12,12 @@ let loadAndParse = require("./util/load-and-parse")
 
 let mediator = new EventEmitter();
 
+let options = {
+    args: ["--no-sandbox"],
+    headless: true
+}
 
-
-puppeteer.launch().then(browser => {
+puppeteer.launch(options).then(browser => {
     createDefaultParser(browser);
     return getDbAdapter(mediator);
 }).then(async db => {
