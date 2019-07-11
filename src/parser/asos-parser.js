@@ -1,12 +1,11 @@
 let AbstractParser = require("./abstract-parser");
-let cheerio = require("cheerio");
-let sanitize = require("../util/sanitize")
+let sanitize = require("../util/sanitize");
 let loadAndParse = require("../util/load-and-parse");
 let to = require("await-to-js").default;
 
-const TITLE_SELECTOR = ".layout-aside .product-hero h1"
-const PRICE_SELECTOR = ".layout-aside .current-price"
-const ARTICLE_SELECTOR = ".product-details .product-code span"
+const TITLE_SELECTOR = ".layout-aside .product-hero h1";
+const PRICE_SELECTOR = ".layout-aside .current-price";
+const ARTICLE_SELECTOR = ".product-details .product-code span";
 
 module.exports = class AsosParser extends AbstractParser {
 
@@ -24,7 +23,7 @@ module.exports = class AsosParser extends AbstractParser {
 
         let { title, price, article } = data;
 
-        article = sanitize.article(article)
+        article = sanitize.article(article);
         price = sanitize.price(typeof price === 'string' ? price.split(",")[0] : null);
         title = sanitize.title(title);
 
@@ -33,6 +32,6 @@ module.exports = class AsosParser extends AbstractParser {
             return Promise.reject("Cant extract price from " + url);
         }
 
-        return { title, article, price }
+        return { title, article, price };
     }
-}
+};

@@ -13,12 +13,12 @@ class ParseManager {
 
         this.getData = momoize(this.getData.bind(this), {
             maxAge: 1 * 60 * 60 * 1000 //1 hour in ms
-        })
+        });
     }
 
     async getData(url) {
         this.checkParsers();
-        let parser = this.selectParser(url)
+        let parser = this.selectParser(url);
 
         if (parser === null) {
             return Promise.reject("No parser found for " + url);
@@ -61,15 +61,15 @@ let createDefaultParser = browser => {
     }
     
     return defaultParser;
-}
+};
 
 let getDefaultParser = () => {
     if (defaultParser === null) {
-        throw new Error("Call createDefaultParser before calling getDefaultParser")
+        throw new Error("Call createDefaultParser before calling getDefaultParser");
     }
 
-    return defaultParser
-} 
+    return defaultParser;
+}; 
 
 
 
@@ -79,4 +79,4 @@ module.exports = {
     ParseManager,
     getDefaultParser,
     createDefaultParser
-}
+};

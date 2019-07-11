@@ -1,11 +1,10 @@
 let AbstractParser = require("./abstract-parser");
-let cheerio = require("cheerio");
-let sanitize = require("../util/sanitize")
+let sanitize = require("../util/sanitize");
 let loadAndParse = require("../util/load-and-parse");
 let to = require("await-to-js").default;
 
-const PRICE_SELECTOR = ".ii-product__wrapper .ii-product__price-current"
-const TITLE_SELECTOR = ".heading_m.ii-product__title"
+const PRICE_SELECTOR = ".ii-product__wrapper .ii-product__price-current";
+const TITLE_SELECTOR = ".heading_m.ii-product__title";
 
 module.exports = class LamodaParser extends AbstractParser {
 
@@ -15,8 +14,8 @@ module.exports = class LamodaParser extends AbstractParser {
             price: PRICE_SELECTOR,
             title: TITLE_SELECTOR,
             article: $ => $('.ii-product__attribute-label:contains("Артикул")')
-                    .parent()
-                    .text()
+                .parent()
+                .text()
         }));
 
         if (err) {
@@ -25,8 +24,8 @@ module.exports = class LamodaParser extends AbstractParser {
 
         let { title, article, price } = data;
 
-        article = sanitize.article(article)
-        price = sanitize.price(price)
+        article = sanitize.article(article);
+        price = sanitize.price(price);
         title = sanitize.title(title);
 
 
@@ -34,6 +33,6 @@ module.exports = class LamodaParser extends AbstractParser {
             return Promise.reject("Cant extract price from " + url);
         }
 
-        return { title, article, price }
+        return { title, article, price };
     }
-}
+};

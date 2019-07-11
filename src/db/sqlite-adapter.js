@@ -1,11 +1,10 @@
-
 let config = require("../config");
 let to = require("await-to-js").to;
-let knex = require("knex")
+let knex = require("knex");
 
 
 let initialize = async () => {
-    let hasTable;
+    let hasTable, err;
 
     let db = knex({
         client: "sqlite3",
@@ -15,8 +14,12 @@ let initialize = async () => {
 
     [err, hasTable] = await to(db.schema.hasTable("items"));
 
+    if (err) {
+        return Promise.reject("Can't query database");
+    }
+
     if (!hasTable) {
-        [err, query] = await db.schema.createTable("items", table => {
+        await db.schema.createTable("items", table => {
             table.increments();
             table.string("shop"); // TODO remove
             table.string("title");
@@ -24,11 +27,15 @@ let initialize = async () => {
             table.string("article");
             table.integer("current_price");
             table.timestamps(true, true);             
-        })        
+        });        
     }
 
     
     [err, hasTable] = await to(db.schema.hasTable("wishes"));
+
+    if (err) {
+        return Promise.reject("Can't query database");
+    }
     
     if (!hasTable) {
         await db.schema.createTable("wishes", table => {
@@ -37,11 +44,11 @@ let initialize = async () => {
             table.string("url");
             table.float("initial_price");
             table.float("last_known_price");
-        })
+        });
     }
     
     return db;
-}
+};
 
 
 let adapter = null;
@@ -51,19 +58,20 @@ let gedAdapter = async () => {
         return Promise.resolve(adapter);
     }
 
-    let [err, db] = await to(initialize())            
+    let [err, db] = await to(initialize());            
 
     if (err) {
         throw new Error("Cannot create sqlite database");
     }
 
-    adapter = {}
+    // eslint-disable-next-line require-atomic-updates
+    adapter = {};
     
     require("./sqlite-items")(db, adapter);
     require("./sqlite-wishes")(db, adapter);
 
     return adapter;
-}
+};
 
 module.exports = gedAdapter;
 

@@ -8,5 +8,5 @@ module.exports = text => {
     return {
         command: result[1].toLowerCase(),
         arguments: result[2].split(/[\s]+/g).map(a => a.toLowerCase())
-    }
-}
+    };
+};

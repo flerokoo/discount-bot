@@ -1,30 +1,26 @@
-let axios = require("axios").default;
-let cheerio = require("cheerio");
-let puppeteer = require("puppeteer");
-let sqlite3 = require("sqlite3").verbose();
-let config = require("./config")
-let getDbAdapter = require("./db/sqlite-adapter");
-let { EventEmitter } = require("events");
-let Crawler = require("./crawler")
-let { createDefaultParser, getDefaultParser } = require("./parser/parse-manager")
-let startBot = require("./bot")
-let loadAndParse = require("./util/load-and-parse")
+const puppeteer = require("puppeteer");
+const getDbAdapter = require("./db/sqlite-adapter");
+const { EventEmitter } = require("events");
+const Crawler = require("./crawler");
+const { createDefaultParser } = require("./parser/parse-manager");
+const startBot = require("./bot");
 
-let mediator = new EventEmitter();
+const mediator = new EventEmitter();
 
-let options = {
+const options = {
     args: ["--no-sandbox"],
     headless: true
-}
+};
 
 puppeteer.launch(options).then(browser => {
     createDefaultParser(browser);
     return getDbAdapter(mediator);
 }).then(async db => {
-    let crawler = new Crawler(mediator, db).start();
     startBot(mediator, db);
+    // eslint-disable-next-line no-unused-vars
+    let crawler = new Crawler(mediator, db).start();
 }).catch(err => {
-    console.log("Failed to launch app")
-    console.log(err.stack || err)
+    console.log("Failed to launch app");
+    console.log(err.stack || err);
 });
 

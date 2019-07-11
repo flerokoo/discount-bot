@@ -11,7 +11,8 @@ module.exports = class AbstractParser {
         this.browser = browser;
     }
    
+    // eslint-disable-next-line no-unused-vars
     parse(url) {
-        throw new Error("Not implemented")
+        throw new Error("Not implemented");
     }
-}
+};

@@ -1,13 +1,8 @@
-let sqlite3 = require("sqlite3");
 let config = require("../config");
 let to = require("await-to-js").to;
-let knex = require("knex")
 let extractDomain = require("../util/extract-domain");
-let moment = require("moment");
-let { getTimestamp } = require("./timestamp")
 let through = require("through2");
-let { getDefaultParser } = require("../parser/parse-manager")
-let memoize = require("mem");
+let { getDefaultParser } = require("../parser/parse-manager");
 let helpers = require("./sqlite-helpers");
 
 let forceQuery = a => a;
@@ -36,15 +31,15 @@ module.exports = (db, adapter) => {
             url, 
             initial_price,
             last_known_price: initial_price,
-        }).then(forceQuery)
+        }).then(forceQuery);
     
         // ADD WISHES ITEM TO THE LIST
         let addItemPromise = adapter.items
             .addByUrl(url)
-            .catch(err => console.log("JUST HERE", err))
+            .catch(err => console.log("JUST HERE", err));
         
         return Promise.all([insertPromise, addItemPromise]);
-    }
+    };
 
     let addByUrlIfNotExists = async (user_id, url) => {
         // TODO add wished item to items table too (if needed)
@@ -53,14 +48,15 @@ module.exports = (db, adapter) => {
     
         if (err) {
             return Promise.reject(err);
-        }
-    
+        }    
+
+        // eslint-disable-next-line no-unused-vars
         let { title, article, price } = data;
     
         return adapter.wishes
             .addIfNotExists(user_id, url, price)
             .then(forceQuery);
-    }
+    };
 
     let update = helpers.genericUpdate("wishes");
 
@@ -71,32 +67,33 @@ module.exports = (db, adapter) => {
         }).join(";\n");
 
         return db.raw(queries).then(forceQuery);
-    }
+    };
 
     let get = helpers.genericGet(db, "wishes");
 
     let exists = helpers.genericExists(db, "wishes");
 
-    let doesUserHave = (user_id, url) => exists({ user_id, url })
+    let doesUserHave = (user_id, url) => exists({ user_id, url });
 
     let iterate = (fn, where = null) => {
         return new Promise((resolve, reject) => {
             let query = db
                 .select()
-                .from("items")
+                .from("items");
 
             if (typeof where === 'object') {
-                query.where(where)
+                query.where(where);
             }
 
-            query.pipe(through.obj((chunk, enc, next) => {
-                    fn(chunk);
-                    next();
-                }))
-            
-            stream.once("finish", resolve)
+            let stream = query.pipe(through.obj((chunk, enc, next) => {
+                fn(chunk);
+                next();
+            }));
+
+            stream.once("error", reject);            
+            stream.once("finish", resolve);
         });
-    }
+    };
 
     let getWithItemsData = (where = null) => {
         let query = db("wishes")
@@ -109,14 +106,14 @@ module.exports = (db, adapter) => {
                 "wishes.user_id",
                 "wishes.last_known_price",
                 "wishes.initial_price"
-            ])
+            ]);
             
         if (where !== null && typeof where === 'object') {
-            query.where(where)
+            query.where(where);
         }
 
-        return query.then(forceQuery)
-    }
+        return query.then(forceQuery);
+    };
 
     let delete_ = helpers.genericDelete(db, "wishes");
 
@@ -131,9 +128,9 @@ module.exports = (db, adapter) => {
         exists,
         delete: delete_,
         batchUpdateLastKnownPrices
-    }
+    };
 
-    Object.assign(adapter, { wishes: all })
+    Object.assign(adapter, { wishes: all });
 
 
-}
+};

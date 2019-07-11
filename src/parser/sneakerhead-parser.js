@@ -1,10 +1,9 @@
 let AbstractParser = require("./abstract-parser");
-let cheerio = require("cheerio");
-let sanitize = require("../util/sanitize")
+let sanitize = require("../util/sanitize");
 let loadAndParse = require("../util/load-and-parse");
 let to = require("await-to-js").default;
 
-const TITLE_SELECTOR = ".container.product-page h1"
+const TITLE_SELECTOR = ".container.product-page h1";
 
 module.exports = class SneakerheadParser extends AbstractParser {
 
@@ -14,7 +13,7 @@ module.exports = class SneakerheadParser extends AbstractParser {
             title: TITLE_SELECTOR,
             price: $ => {
                 let discountPriceContainer = $(".price-table .price-new");
-                let priceContainer = $(".price-table .price")
+                let priceContainer = $(".price-table .price");
 
                 if (discountPriceContainer.length > 0) {
                     return discountPriceContainer.text();
@@ -31,13 +30,13 @@ module.exports = class SneakerheadParser extends AbstractParser {
         let { title, price } = data;
         let article = "";
         
-        price = sanitize.price(price)
+        price = sanitize.price(price);
         title = sanitize.title(title);
 
         if (!price || isNaN(price)) {
             return Promise.reject("Cant extract price from " + url);
         }
 
-        return { title, article, price }
+        return { title, article, price };
     }
-}
+};

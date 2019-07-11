@@ -1,12 +1,11 @@
 let AbstractParser = require("./abstract-parser");
-let cheerio = require("cheerio");
-let sanitize = require("../util/sanitize")
+let sanitize = require("../util/sanitize");
 let loadAndParse = require("../util/load-and-parse");
 let to = require("await-to-js").default;
 
-const ARTICLE_SELECTOR = ".product-article"
-const PRICE_SELECTOR = ".product-col__aside--right .price--current"
-const TITLE_SELECTOR = ".product-heading span"
+const ARTICLE_SELECTOR = ".product-article";
+const PRICE_SELECTOR = ".product-col__aside--right .price--current";
+const TITLE_SELECTOR = ".product-heading span";
 
 module.exports = class StreetBeatParser extends AbstractParser {
 
@@ -51,13 +50,13 @@ module.exports = class StreetBeatParser extends AbstractParser {
         let { title, article, price } = data;
 
         title = sanitize.title(title);
-        article = sanitize.article(article)
-        price = sanitize.price(price)
+        article = sanitize.article(article);
+        price = sanitize.price(price);
 
         if (!price || isNaN(price)) {
             return Promise.reject("Cant extract price from " + url);
         }
 
-        return { title, article, price }
+        return { title, article, price };
     }
-}
+};

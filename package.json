@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "./node_modules/.bin/env-cmd -f .env nodemon src/index"
+    "start:dev": "./node_modules/.bin/env-cmd -e common,development nodemon src/index",
+    "start": "./node_modules/.bin/env-cmd -e common,production nodemon src/index"
   },
   "keywords": [],
   "author": "Emile Shodiev <emile.shodiev@yandex.ru> (http://shodiev.ru)",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "cross-env": "^5.2.0",
-    "env-cmd": "^9.0.3"
+    "env-cmd": "^9.0.3",
+    "eslint": "^6.0.1"
   }
 }

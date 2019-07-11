@@ -1,6 +1,8 @@
-/.env
+/.env-cmdrc
 /db
 /start.bat
+/todo
+/logs
 
 # Created by https://www.gitignore.io/api/node,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=node,visualstudiocode

@@ -3,6 +3,7 @@ let bypass = require("./bypass-bot-detection");
 let to = require("await-to-js").to;
 
 module.exports = async (browser, url, fields) => {
+    // eslint-disable-next-line no-unused-vars
     let _, err, html, page = await browser.newPage(); 
 
     [err, _] = await to(bypass(page));
@@ -17,7 +18,7 @@ module.exports = async (browser, url, fields) => {
 
     [err, html] = await to(page.content());
     if (err) {
-        return Promise.reject("Error when getting html from page: " + err)
+        return Promise.reject("Error when getting html from page: " + err);
     }
 
     await page.close();
@@ -40,4 +41,4 @@ module.exports = async (browser, url, fields) => {
     }
     
     return out;
-}
+};

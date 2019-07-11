@@ -1,9 +1,6 @@
-let Scene = require("telegraf/scenes/base")
-let config = require("../../config");
-let extractDomain = require("../../util/extract-domain");
-let { getDefaultParser } = require("../../parser/parse-manager");
-let logger = require("winston");
+let Scene = require("telegraf/scenes/base");
 let to = require("await-to-js").default;
+let logger = require("../../util/logger");
 
 
 
@@ -13,22 +10,23 @@ let createScene = (Scene, db) => {
 
     scene.enter(ctx => {
         db.wishes.getWithItemsData({ "wishes.user_id": ctx.chat.id }).then(data => {            
-            console.log(data)
+            console.log(data);
             if (!data || data.length <= 0) {
-                ctx.reply("Nothing to delete, go /back to main menu")
+                ctx.reply("Nothing to delete, go /back to main menu");
             } else {
                 let commands = data
                     .map(d => `${d.title}\n${d.url}\n/remove${d.id}`)
-                    .join("\n\n")
-                ctx.reply(commands + "\n\nor go /back")
+                    .join("\n\n");
+                ctx.reply(commands + "\n\nor go /back");
             }
         }).catch(err => {
-            ctx.reply("Can't fetch your items, try again later")
+            logger.error("Remove-wish scene: cant send list of items: " + err);
+            ctx.reply("Can't fetch your items, try again later");
             ctx.scene.enter("main");
-        })
+        });
     });
 
-    scene.command("back", ctx => ctx.scene.enter("main"))
+    scene.command("back", ctx => ctx.scene.enter("main"));
 
     scene.on("message", async ctx => {
         let text = ctx.message.text;
@@ -51,18 +49,18 @@ let createScene = (Scene, db) => {
         }
 
         db.wishes.delete({ id })
-            .then(res => {
+            .then(() => {
                 ctx.reply("Success!");
-                ctx.scene.enter("main")
+                ctx.scene.enter("main");
             })
             .catch(err => {
                 ctx.reply("Something wrong: " + err);
-                ctx.scene.enter("main")
-            })
+                ctx.scene.enter("main");
+            });
 
     });
     
     return scene;
-}
+};
 
 module.exports = db => createScene(Scene, db);

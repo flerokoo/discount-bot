@@ -8,4 +8,4 @@ module.exports = {
     price: price => typeof price === 'string'
         ? parseInt(price.replace(/[\D]+/gi, ""))
         : null
-}
+};

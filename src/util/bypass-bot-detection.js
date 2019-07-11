@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // https://intoli.com/blog/not-possible-to-block-chrome-headless/
 module.exports = async page => {
     // Pass the User-Agent Test.
@@ -49,4 +50,4 @@ module.exports = async page => {
             get: () => ['en-US', 'en'],
         });
     });
-}
+};
