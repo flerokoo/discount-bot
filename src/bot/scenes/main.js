@@ -44,7 +44,7 @@ let createScene = (Scene, db) => {
         // })
 
         db.wishes.getWithItemsData({ "wishes.user_id": ctx.chat.id }).then(data => {
-            let text = data.map(i => `${i.title}\n${i.url}`).join("\n");
+            let text = data.map(i => `${i.title} — ${i.current_price}\n${i.url}`).join("\n");
             ctx.editMessageText("Here's your wishlist:\n\n" + text, mainMenuKeyboard); 
         }).catch(err => {
             ctx.editMessageText("Can't get your wishlist, try later", mainMenuKeyboard)
