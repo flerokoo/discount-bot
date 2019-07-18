@@ -20,7 +20,7 @@ let mainMenuKeyboard = Markup.inlineKeyboard([
     ],
 ]).oneTime().resize().extra();
 
-let createScene = (Scene, db) => {
+let createScene = ({ Scene, db }) => {
     let scene = new Scene("main");
     scene.enter(ctx => {
         // ctx.reply("ye", Markup.keyboard(["Add item", "Remove item", "Shops"]).oneTime().resize().extra());
@@ -56,4 +56,4 @@ let createScene = (Scene, db) => {
     return scene;
 };
 
-module.exports = db => createScene(Scene, db);
+module.exports = createScene;

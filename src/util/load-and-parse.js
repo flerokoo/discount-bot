@@ -2,12 +2,15 @@ let cheerio = require("cheerio");
 let bypass = require("./bypass-bot-detection");
 let to = require("await-to-js").to;
 
-module.exports = async (browser, url, fields) => {
+module.exports = async (browser, url, fields, needsBypass=true) => {
     // eslint-disable-next-line no-unused-vars
     let _, err, html, page = await browser.newPage(); 
 
-    [err, _] = await to(bypass(page));
-    if (err) {
+    if (needsBypass) {
+        [err, _] = await to(bypass(page));
+    }
+
+    if (needsBypass && err) {
         return Promise.reject("Error when bypassing bot detection: " + err);
     }
 

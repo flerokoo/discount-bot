@@ -5,13 +5,15 @@
   "main": "index.js",
   "scripts": {
     "start:dev": "./node_modules/.bin/env-cmd -e common,development nodemon src/index",
-    "start": "./node_modules/.bin/env-cmd -e common,production nodemon src/index"
+    "start": "./node_modules/.bin/env-cmd -e common,production nodemon src/index",
+    "test": "./node_modules/.bin/jest"
   },
   "keywords": [],
   "author": "Emile Shodiev <emile.shodiev@yandex.ru> (http://shodiev.ru)",
   "license": "ISC",
   "dependencies": {
     "await-to-js": "^2.1.1",
+    "awilix": "^4.2.2",
     "axios": "^0.19.0",
     "cheerio": "^1.0.0-rc.3",
     "knex": "^0.18.2",
@@ -27,6 +29,8 @@
   "devDependencies": {
     "cross-env": "^5.2.0",
     "env-cmd": "^9.0.3",
-    "eslint": "^6.0.1"
+    "eslint": "^6.0.1",
+    "jest": "^24.8.0",
+    "sinon": "^7.3.2"
   }
 }

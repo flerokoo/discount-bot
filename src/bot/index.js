@@ -5,13 +5,19 @@ let config = require("../config");
 let Messages = require("../messages");
 let logger = require("../util/logger");
 
-let startBotFactory = Telegraf => (mediator, db) => {
+let startBot = ({
+    Telegraf,
+    Stage,
+    Scene,
+    mediator,
+    db,
+    registerScenes
+}) => {
+
     const bot = new Telegraf(config.botToken);
 
     const stage = new Stage();
-    stage.register(require("./scenes/main")(db));
-    stage.register(require("./scenes/add-wish")(db));
-    stage.register(require("./scenes/remove-wish")(db));
+    registerScenes(stage, db, Scene);
 
     bot.use(session());
     bot.use(stage.middleware());
@@ -19,15 +25,6 @@ let startBotFactory = Telegraf => (mediator, db) => {
     bot.start(ctx => {
         ctx.scene.enter("main");
     });
-
-    // bot.on("message", ctx => {
-    //     console.log("ctx.message.from.id", ctx.message.from.id)
-    //     console.log("ctx.from.id", ctx.from.id)
-    //     console.log("ctx.chat.id", ctx.chat.id)
-    //     setTimeout(() => {
-    //         bot.telegram.sendMessage(ctx.message.from.id, "Some messg")
-    //     }, 1000)
-    // })
     
     mediator.on(Messages.NOTIFY_USERS, async () => {
         logger.info("Notifying users");
@@ -58,4 +55,4 @@ let startBotFactory = Telegraf => (mediator, db) => {
     logger.info("Bot started");
 };
 
-module.exports = startBotFactory(Telegraf);
+module.exports = startBot

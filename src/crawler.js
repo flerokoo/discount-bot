@@ -7,7 +7,7 @@ let Messages = require("./messages");
 let logger = require("./util/logger");
 
 module.exports = class Crawler {
-    constructor(mediator, db) {
+    constructor({ mediator, db }) {
         this.mediator = mediator;
         this.db = db;
         
@@ -25,12 +25,13 @@ module.exports = class Crawler {
 
         mediator.on(Messages.LOCK_CRAWLING, () => this.locked = true);
         mediator.on(Messages.UNLOCK_CRAWLING, () => this.locked = false);
+        logger.info("Crawler initialized");
     }
 
     start() {
-        logger.info("Crawler is started");
+        logger.info("Crawler started");
         this.runningTasksAmounts = {};
-        this.rule = schedule.scheduleJob("*/10 * * * * *", () => this.runCycle());
+        this.rule = schedule.scheduleJob(config.crawlingInterval, () => this.runCycle());
         this.rule.invoke();
         return this;
     }
@@ -46,7 +47,6 @@ module.exports = class Crawler {
     }
 
     async runCycle() {    
-        
         if (this.running || this.locked) {
             return;
         }
@@ -74,11 +74,10 @@ module.exports = class Crawler {
 
         let onItemDataLoad = (price, article, title, item) => {
             
-            // console.log(`Updated ${item.title} prev price ${item.current_price} cur ${price}`)
+            console.log(`Updated ${item.title} prev price ${item.current_price} cur ${price}`)
             // console.log(item)
             // this.db.items.updatePriceById(item.id, price).then(() => null)
             item.new_price = price;
-            // console.log(`slots=${slots} completed=${title}`)
             slots++;
             completed++;
             if (completed === items.length) {
@@ -105,7 +104,6 @@ module.exports = class Crawler {
                         continue;
                     }
                 }                    
-
                 this.parser.getData(item.url)
                     .then(({ price, article, title }) => onItemDataLoad(price, article, title, item))
                     .catch(err => {
@@ -118,7 +116,6 @@ module.exports = class Crawler {
                 slots--;
             }
         };
-
         next();
         
     }

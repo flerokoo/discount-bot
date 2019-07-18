@@ -1,8 +1,10 @@
 module.exports = {
     dbPath: "./db/sqlite",
     logPath: "./logs/",
-    // updateInterval: 6 * 60 * 60 * 1000, // 6 hours in ms
+    // updateInterval: 6 * 60 * 60 * 1000, // 6 hours in ms,
     updateInterval: 10000, //ms
+    // crawlingInterval: "",
+    crawlingInterval: "*/10 * * * * *", // every ten seconds
     supportedShops: [
         "street-beat.ru",
         "lamoda.ru",

@@ -5,7 +5,7 @@ let to = require("await-to-js").default;
 
 
 
-let createScene = (Scene, db) => {
+let createScene = ({ Scene, db }) => {
 
     let parser = getDefaultParser();
     let scene = new Scene("add-wish");
@@ -47,4 +47,4 @@ let createScene = (Scene, db) => {
     return scene;
 };
 
-module.exports = db => createScene(Scene, db);
+module.exports = createScene;

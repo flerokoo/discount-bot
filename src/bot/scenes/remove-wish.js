@@ -4,7 +4,7 @@ let logger = require("../../util/logger");
 
 
 
-let createScene = (Scene, db) => {
+let createScene = ({ Scene, db }) => {
 
     let scene = new Scene("remove-wish");
 
@@ -63,4 +63,4 @@ let createScene = (Scene, db) => {
     return scene;
 };
 
-module.exports = db => createScene(Scene, db);
+module.exports = createScene;
