@@ -57,7 +57,11 @@ module.exports = class Crawler {
         let current = 0;
         let completed = 0;
         let slots = this.maxConcurrentTasks;
-        let items = await this.db.items.get();        
+        let items = await this.db.items.get();  
+        
+        if (items.length <= 0) {
+            return this.running = false;
+        }
 
         let randomDelay = () => new Promise(resolve => setTimeout(resolve, Math.random() * 2000));
         
@@ -70,6 +74,7 @@ module.exports = class Crawler {
                 this.mediator.emit(Messages.NOTIFY_USERS);
             });
             
+            logger.info("Finished crawling cycle");
         };
 
         let onItemDataLoad = (price, article, title, item) => {
@@ -93,17 +98,17 @@ module.exports = class Crawler {
             if (!this.running || this.locked) return;            
 
             while (current < items.length && slots > 0) {                
-                let item = items[current++];  
-                
+                let item = items[current++];                  
                 if (moment().diff(fromTimestamp(item.updated_at)) < config.updateInterval) {
-                    // console.log("skipping " + item.title)
+                    console.log("skipping " + item.title)
                     completed++;     
                     if (completed === items.length) {
                         return finalize();
                     } else {
                         continue;
                     }
-                }                    
+                } 
+                
                 this.parser.getData(item.url)
                     .then(({ price, article, title }) => onItemDataLoad(price, article, title, item))
                     .catch(err => {
@@ -116,6 +121,7 @@ module.exports = class Crawler {
                 slots--;
             }
         };
+
         next();
         
     }
