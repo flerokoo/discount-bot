@@ -1,8 +1,10 @@
 /.env-cmdrc
 /db
-/start.bat
+/build.sh
+/run.sh
 /todo
 /logs
+/Dockerfile.dev
 
 # Created by https://www.gitignore.io/api/node,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=node,visualstudiocode

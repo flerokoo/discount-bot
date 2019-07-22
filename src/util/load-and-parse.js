@@ -2,12 +2,19 @@ let cheerio = require("cheerio");
 let bypass = require("./bypass-bot-detection");
 let to = require("await-to-js").to;
 
-module.exports = async (browser, url, fields, needsBypass=true) => {
+module.exports = async (browser, url, fields, needsBypass=false) => {
     // eslint-disable-next-line no-unused-vars
     let _, err, html, page = await browser.newPage(); 
 
-    if (needsBypass) {
+    // Now replaced by puppeteer-extra-plugin-stealth (see /src/index.js)
+    if (needsBypass) {        
         [err, _] = await to(bypass(page));
+    }
+
+    [err, _] = await to(page.setCacheEnabled(false));
+
+    if (err) {
+        return Promise.reject("Cant disable cache: " + err);
     }
 
     if (needsBypass && err) {
@@ -20,6 +27,7 @@ module.exports = async (browser, url, fields, needsBypass=true) => {
     }
 
     [err, html] = await to(page.content());
+
     if (err) {
         return Promise.reject("Error when getting html from page: " + err);
     }
@@ -43,5 +51,5 @@ module.exports = async (browser, url, fields, needsBypass=true) => {
         }
     }
     
-    return out;
+    return { html, ...out };
 };

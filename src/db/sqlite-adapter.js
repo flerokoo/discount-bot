@@ -1,21 +1,25 @@
 let config = require("../config");
 let to = require("await-to-js").to;
 let knex = require("knex");
+let fs = require("fs");
+let path = require("path");
 
 
 let initialize = async () => {
     let hasTable, err;
 
+    if (!fs.existsSync(config.dbPath))
+        fs.mkdirSync(config.dbPath);
+
     let db = knex({
         client: "sqlite3",
         useNullAsDefault: true,
-        connection: { filename: config.dbPath }
+        connection: { filename: path.join(config.dbPath, config.dbName) }
     });
 
     [err, hasTable] = await to(db.schema.hasTable("items"));
-
     if (err) {
-        return Promise.reject("Can't query database");
+        return Promise.reject("Can't query database: " + JSON.stringify(err));
     }
 
     if (!hasTable) {
@@ -34,7 +38,7 @@ let initialize = async () => {
     [err, hasTable] = await to(db.schema.hasTable("wishes"));
 
     if (err) {
-        return Promise.reject("Can't query database");
+        return Promise.reject("Can't query database: " + JSON.stringify(err));
     }
     
     if (!hasTable) {
@@ -61,7 +65,7 @@ let gedAdapter = async () => {
     let [err, db] = await to(initialize());            
 
     if (err) {
-        throw new Error("Cannot create sqlite database");
+        throw new Error("Cannot create sqlite database: " + err);
     }
 
     // eslint-disable-next-line require-atomic-updates

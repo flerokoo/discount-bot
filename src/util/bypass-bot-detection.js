@@ -17,7 +17,7 @@ module.exports = async page => {
     // Pass the User-Agent Test.
     const userAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
   
-    // await page.setUserAgent(userAgent);
+    await page.setUserAgent(userAgent);
 
     // Pass the Webdriver Test.
     await page.evaluateOnNewDocument(() => {

@@ -12,7 +12,8 @@ class ParseManager {
         this.browser = browser;
 
         this.getData = momoize(this.getData.bind(this), {
-            maxAge: 1 * 60 * 60 * 1000 //1 hour in ms
+            maxAge: 1 * 60 * 60 * 1000, //1 hour in ms,            
+            cachePromiseRejection: false 
         });
     }
 

@@ -2,6 +2,7 @@ let AbstractParser = require("./abstract-parser");
 let sanitize = require("../util/sanitize");
 let loadAndParse = require("../util/load-and-parse");
 let to = require("await-to-js").default;
+const logger = require("../util/logger");
 
 const TITLE_SELECTOR = ".container.product-page h1";
 
@@ -27,13 +28,14 @@ module.exports = class SneakerheadParser extends AbstractParser {
             return Promise.reject(err);
         }
 
-        let { title, price } = data;
+        let { title, price, html } = data;
         let article = "";
         
         price = sanitize.price(price);
         title = sanitize.title(title);
 
         if (!price || isNaN(price)) {
+            logger.debug(html)
             return Promise.reject("Cant extract price from " + url);
         }
 

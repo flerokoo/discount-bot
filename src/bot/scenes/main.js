@@ -1,4 +1,3 @@
-let Scene = require("telegraf/scenes/base");
 let config = require("../../config");
 let Markup = require("telegraf/markup");
 let logger = require("../../util/logger");
