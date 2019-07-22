@@ -24,11 +24,11 @@ RUN npm i --production
 RUN mkdir logs/
 RUN mkdir db/
 
-# VOLUME db/
-# VOLUME logs/
+VOLUME /app/db/
+VOLUME /app/logs/
 
-# ENV PUPPETEER_EXECUTABLE_PATH /usr/local/share/.config/yarn/global/node_modules/puppeteer/.local-chromium/linux-571375/chrome-linux/chrome
-ENV NODE_ENV development
+ENV PUPPETEER_EXECUTABLE_PATH google-chrome-unstable
+ENV NODE_ENV production
 ENV BOT_TOKEN your_bot_token_here
 
 COPY . .
@@ -36,7 +36,6 @@ COPY . .
 RUN chmod 777 -R /app/db 
 
 USER pptruser
-
 
 CMD ["node", "src/index"]
 
